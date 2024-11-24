@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: knowledge-base-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: knowledge-base-service
+  template:
+    metadata:
+      labels:
+        app: knowledge-base-service
+    spec:
+      containers:
+        - name: knowledge-base-service
+          image: knowledge-base-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5003
+          env:
+            - name: MONGO_URI
+              value: "mongodb://host.docker.internal:27017/Article"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                 name: jwt-secrets
+                 key: jwt_secret
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: knowledge-base-service
+spec:
+  selector:
+    app: knowledge-base-service
+  ports:
+    - protocol: TCP
+      port: 5003
+      targetPort: 5003

@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-notification-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db-notification-service
+  template:
+    metadata:
+      labels:
+        app: db-notification-service
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:latest  # MongoDB image (latest version)
+        ports:
+        - containerPort: 27017  # MongoDB default port
+        env:
+        - name: MONGO_INITDB_DATABASE
+          value: "Notification"  
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-notification-service
+spec:
+  selector:
+    app: db-notification-service
+  ports:
+    - protocol: TCP
+      port: 27017  # MongoDB default port
+      targetPort: 27017  # MongoDB default port

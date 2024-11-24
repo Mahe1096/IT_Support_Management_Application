@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-magmt-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-magmt-service
+  template:
+    metadata:
+      labels:
+        app: user-magmt-service
+    spec:
+      containers:
+        - name: user-magmt-service
+          image: user-magmt-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5001
+          env:
+            - name: MONGO_URI
+              value: "mongodb://host.docker.internal:27017/User"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                 name: jwt-secrets
+                 key: jwt_secret
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-magmt-service
+spec:
+  selector:
+    app: user-magmt-service
+  ports:
+    - protocol: TCP
+      port: 5001
+      targetPort: 5001

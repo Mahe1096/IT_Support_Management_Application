@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ticket-mgmt-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ticket-mgmt-service
+  template:
+    metadata:
+      labels:
+        app: ticket-mgmt-service
+    spec:
+      containers:
+      - name: ticket-mgmt-service
+        image: ticket-mgmt-service:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5002
+        env:
+        - name: MONGO_URI
+          value: "mongodb://host.docker.internal:27017/Ticket"
+        - name: RABBITMQ_URI
+          value: "amqp://host.docker.internal"
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secrets
+              key: jwt_secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ticket-mgmt-service
+spec:
+  selector:
+    app: ticket-mgmt-service
+  ports:
+    - protocol: TCP
+      port: 5002
+      targetPort: 5002
